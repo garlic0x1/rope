@@ -101,7 +101,10 @@
   (if (balancedp rope)
       rope
       (multiple-value-bind (leaves length) (collect-rope rope)
-        (merge-leaves leaves 0 length))))
+        (merge-leaves
+         (remove-if (lambda (leaf) (= 0 (rope-length leaf)))
+                    leaves)
+         0 length))))
 
 ;;--------;;
 ;; Insert ;;
@@ -158,11 +161,20 @@
                (values left right))
               ((< index weight)
                (multiple-value-bind (ante post) (split-rope left index)
-                 (values ante (concat-rope post right))))
+                 (values (balance-rope ante)
+                         (balance-rope (concat-rope post right)))))
               ((> index weight)
                (multiple-value-bind (ante post) (split-rope right (- index weight))
-                 (values (concat-rope left ante) post))))))))
+                 (values (balance-rope (concat-rope left ante))
+                         (balance-rope post)))))))))
 
-;;--------;;
-;; Delete ;;
-;;--------;;
+;;------;;
+;; Kill ;;
+;;------;;
+
+(defun kill-rope (rope from &optional to)
+  (multiple-value-bind (ante _) (split-rope rope from)
+    (declare (ignore _))
+    (multiple-value-bind (_ post) (split-rope rope (or to from))
+      (declare (ignore _))
+      (balance-rope (concat-rope ante post)))))
