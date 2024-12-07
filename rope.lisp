@@ -152,7 +152,16 @@
     (values (make-rope (subseq (leaf-string rope) 0 index))
             (make-rope (subseq (leaf-string rope) index))))
   (:method ((rope branch) index)
-    (warn "TODO")))
+    (with-slots (left right) rope
+      (let ((weight (rope-weight rope)))
+        (cond ((= index weight)
+               (values left right))
+              ((< index weight)
+               (multiple-value-bind (ante post) (split-rope left index)
+                 (values ante (concat-rope post right))))
+              ((> index weight)
+               (multiple-value-bind (ante post) (split-rope right (- index weight))
+                 (values (concat-rope left ante) post))))))))
 
 ;;--------;;
 ;; Delete ;;

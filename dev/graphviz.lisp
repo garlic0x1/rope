@@ -5,6 +5,22 @@
 (defparameter rope::*long-leaf* 24)
 (defparameter rope::*short-leaf* 8)
 
+(defclass root ()
+  ((rope :initarg :rope :accessor root-rope)))
+
+(defmethod graph-object-node ((self (eql 'rope)) (obj root))
+  (let ((obj (root-rope obj)))
+    (make-instance 'node
+                   :attributes `(:label ,(format nil "length: ~a~%depth: ~a"
+                                                 (rope-length obj)
+                                                 (rope-depth obj))
+                                 :style :filled
+                                 ))))
+
+(defmethod graph-object-points-to ((self (eql 'rope)) (obj root))
+  (let ((obj (root-rope obj)))
+    (graph-object-points-to self obj)))
+
 (defmethod graph-object-node ((self (eql 'rope)) (obj branch))
   (make-instance 'node
                  :attributes `(:label ,(format nil "length: ~a~%depth: ~a"
@@ -12,20 +28,34 @@
                                                (rope-depth obj)))))
 
 (defmethod graph-object-points-to ((self (eql 'rope)) (obj branch))
-  (list (branch-right obj) (branch-left obj)))
+  (list (make-instance 'attributed
+                       :object (branch-right obj)
+                       :attributes `(:label "R"))
+        (make-instance 'attributed
+                       :object (branch-left obj)
+                       :attributes `(:label "L"))))
 
 (defmethod graph-object-node ((self (eql 'rope)) (obj leaf))
   (make-instance 'node
                  :attributes `(:label ,(rope::leaf-string obj)
                                :shape :box)))
 
-(defun graph-rope (rope &key (output-file "/tmp/graph.png"))
+(defun graph-ropes (ropes &key (output-file "/tmp/graph.png"))
   (cl-dot:dot-graph (cl-dot:generate-graph-from-roots
                      'rope
-                     (list rope))
+                     (mapcar (lambda (rope)
+                               (make-instance 'root :rope rope))
+                             ropes))
                     output-file
                     :format :png)
   #+slynk (slynk:ed-in-emacs output-file))
 
 #+example
-(graph-rope (rope::make-rope *string*))
+(graph-ropes (list (rope::make-rope *string*)))
+
+#+example
+(let ((output-file "/tmp/split-graph.png")
+      (rope (rope::make-rope *string*)))
+  (multiple-value-bind (ante post) (rope::split-rope rope 30)
+    (graph-ropes (list rope ante post))
+    #+slynk (slynk:ed-in-emacs output-file)))
