@@ -90,15 +90,17 @@
 
 (defun merge-leaves (leaves start end)
   (let ((range (- end start)))
+
+    (format t "leaves: ~a, start: ~a, end: ~a~%" leaves start end)
     (case range
-      (1 (first leaves))
-      (2 (concat-rope (first leaves) (second leaves)))
-      (t (let ((mid (+ start (/ range 2))))
+      (1 (nth start leaves))
+      (2 (concat-rope (nth start leaves) (nth (1+ start) leaves)))
+      (t (let ((mid (+ start (round (/ range 2)))))
            (concat-rope (merge-leaves leaves start mid)
                         (merge-leaves leaves mid end)))))))
 
-(defun balance-rope (rope)
-  (if (balancedp rope)
+(defun balance-rope (rope &optional forcep)
+  (if (and (balancedp rope) (not forcep))
       rope
       (multiple-value-bind (leaves length) (collect-rope rope)
         (merge-leaves
@@ -140,11 +142,12 @@
 ;;--------;;
 
 (defmethod concat-rope (left right)
-  (make-instance 'branch
-                 :length (+ (rope-length left) (rope-length right))
-                 :depth (1+ (max (rope-depth left) (rope-depth right)))
-                 :left left
-                 :right right))
+  (balance-rope
+   (make-instance 'branch
+                  :length (+ (rope-length left) (rope-length right))
+                  :depth (1+ (max (rope-depth left) (rope-depth right)))
+                  :left left
+                  :right right)))
 
 ;;-------;;
 ;; Split ;;
@@ -177,4 +180,4 @@
     (declare (ignore _))
     (multiple-value-bind (_ post) (split-rope rope (or to from))
       (declare (ignore _))
-      (balance-rope (concat-rope ante post)))))
+      (concat-rope ante post))))

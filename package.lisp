@@ -11,6 +11,8 @@
    #:leaf-string                        ; ACCESSOR
    #:make-rope                          ; CONSTRUCTOR
    #:write-rope                         ; FUNCTION
+   #:prepend-rope                       ; FUNCTION
+   #:append-rope                        ; FUNCTION
    #:insert-rope                        ; FUNCTION
    #:index-rope                         ; FUNCTION
    #:concat-rope                        ; FUNCTION

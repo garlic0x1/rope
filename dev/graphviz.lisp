@@ -54,8 +54,19 @@
 (graph-ropes (list (rope::make-rope *string*)))
 
 #+example
-(let ((output-file "/tmp/split-graph.png")
-      (rope (rope::make-rope *string*)))
+(let ((rope (rope::make-rope *string*)))
   (multiple-value-bind (ante post) (rope::split-rope rope 30)
-    (graph-ropes (list rope ante post))
-    #+slynk (slynk:ed-in-emacs output-file)))
+    (graph-ropes (list rope ante post))))
+
+#+example
+(let ((rope (rope::make-rope "Hello")))
+  (setf rope (append-rope rope ", "))
+  (print (rope::balancedp rope))
+  (setf rope (append-rope rope "world!"))
+  (setf rope (append-rope rope " it's nice to meet you!"))
+  (setf rope (append-rope rope " hopefully"))
+  (setf rope (append-rope rope " we can do it again"))
+  (setf rope (append-rope rope " later!"))
+  (print (rope::balancedp rope))
+  (setf rope (rope::balance-rope rope ))
+  (graph-ropes (list rope)))
