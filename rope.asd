@@ -11,4 +11,10 @@
   :components ((:module "test"
                 :components ((:file "package")
                              (:file "basic"))))
-  :perform (test-op (o c) (uiop:symbol-call :fiasco :all-tests)))
+  :perform (asdf:test-op (o c) (uiop:symbol-call :fiasco :all-tests)))
+
+(asdf:defsystem #:rope/dev
+  :depends-on (#:rope #:cl-dot)
+  :components ((:module "dev"
+                :components ((:file "package")
+                             (:file "graphviz")))))
