@@ -33,13 +33,6 @@
 ;; Utils ;;
 ;;-------;;
 
-(defun fibonacci (n)
-  (case n
-    (0 0)
-    (1 1)
-    (t (+ (fibonacci (- n 1))
-          (fibonacci (- n 2))))))
-
 (defgeneric make-rope (source)
   (:method ((source string))
     (let ((length (length source)))
