@@ -85,13 +85,13 @@
   (:method ((rope leaf))
     t)
   (:method ((rope branch))
-    (<= (fibonacci (+ 2 (rope-depth rope)))
-        (rope-length rope))))
+    (with-slots (left right) rope
+      (and (balancedp left)
+           (balancedp right)
+           (>= 2 (abs (- (rope-depth left) (rope-depth right))))))))
 
 (defun merge-leaves (leaves start end)
   (let ((range (- end start)))
-
-    (format t "leaves: ~a, start: ~a, end: ~a~%" leaves start end)
     (case range
       (1 (nth start leaves))
       (2 (concat-rope (nth start leaves) (nth (1+ start) leaves)))
