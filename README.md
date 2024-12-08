@@ -11,7 +11,7 @@ usage, as well as enable a functional style of programming.
 
 # Installation
 
-With Ultralisp installed:
+With [Ultralisp](https://ultralisp.org/) installed:
 
 ```lisp
 (ql:quickload :rope)
