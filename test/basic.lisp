@@ -22,6 +22,7 @@ can be done efficiently.")
     (is (string= *string-2* (rope:write-rope rope-2 nil)))))
 
 (deftest split ()
+  "Test splitting ropes and check to ensure it is the same as splitting strings."
   (dotimes (i (length *string-2*))
     (let ((rope (rope:make-rope *string-2*)))
       (multiple-value-bind (ante post) (rope:split-rope rope i)
@@ -29,9 +30,18 @@ can be done efficiently.")
         (is (string= (subseq *string-2* i) (rope:write-rope post nil)))))))
 
 (deftest delete-and-insert ()
+  "Make a rope, then a rope with a part deleted, then inserted."
   (let* ((rope (rope:make-rope *string-1*))
          (killed (rope:kill-rope rope 0 5))
-         (inserted (rope:insert-rope killed 0 "Goodbye")))
+         (inserted (rope:insert-rope killed 0 "Goodbye"))
+         (super (rope:insert-rope rope 7 "super ")))
     (is (string= "Hello, rope!" (rope:write-rope rope nil)))
     (is (string= ", rope!" (rope:write-rope killed nil)))
-    (is (string= "Goodbye, rope!" (rope:write-rope inserted nil)))))
+    (is (string= "Goodbye, rope!" (rope:write-rope inserted nil)))
+    (is (string= "Hello, super rope!" (rope:write-rope super nil)))))
+
+(deftest index-rope ()
+  "Test accessing characters by index"
+  (let* ((rope (rope:make-rope "0123456789")))
+    (is (string= #\1 (rope:index-rope rope 1)))
+    (is (string= #\9 (rope:index-rope rope 9)))))

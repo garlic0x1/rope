@@ -59,7 +59,8 @@
 
 (defgeneric walk-rope (rope func)
   (:method ((rope leaf) func)
-    (funcall func rope))
+    (funcall func rope)
+    (values))
   (:method ((rope branch) func)
     (walk-rope (branch-left rope) func)
     (walk-rope (branch-right rope) func)))
@@ -122,11 +123,17 @@
 ;; Insert ;;
 ;;--------;;
 
-(defun prepend-rope (rope str)
-  (concat-rope (make-rope str) rope))
+(defgeneric prepend-rope (rope source)
+  (:method (rope (source string))
+    (concat-rope (make-rope source) rope))
+  (:method (rope (source rope))
+    (concat-rope source rope)))
 
-(defun append-rope (rope str)
-  (concat-rope rope (make-rope str)))
+(defgeneric append-rope (rope source)
+  (:method (rope (source string))
+    (concat-rope rope (make-rope source)))
+  (:method (rope (source rope))
+    (concat-rope rope source)))
 
 (defun insert-rope (rope index str)
   (cond ((= index 0) (prepend-rope rope str))

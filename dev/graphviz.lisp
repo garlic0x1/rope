@@ -6,16 +6,17 @@
 (defparameter rope::*short-leaf* 8)
 
 (defclass root ()
-  ((rope :initarg :rope :accessor root-rope)))
+  ((name :initarg :name :accessor root-name)
+   (rope :initarg :rope :accessor root-rope)))
 
-(defmethod graph-object-node ((self (eql 'rope)) (obj root))
-  (let ((obj (root-rope obj)))
+(defmethod graph-object-node ((self (eql 'rope)) (root root))
+  (let ((obj (root-rope root)))
     (make-instance 'node
-                   :attributes `(:label ,(format nil "length: ~a~%depth: ~a"
+                   :attributes `(:label ,(format nil "rope: ~a~%length: ~a~%depth: ~a"
+                                                 (root-name root)
                                                  (rope-length obj)
                                                  (rope-depth obj))
-                                 :style :filled
-                                 ))))
+                                 :style :filled))))
 
 (defmethod graph-object-points-to ((self (eql 'rope)) (obj root))
   (let ((obj (root-rope obj)))
@@ -41,13 +42,15 @@
                                :shape :box)))
 
 (defun graph-ropes (ropes &key (output-file "/tmp/graph.png"))
-  (cl-dot:dot-graph (cl-dot:generate-graph-from-roots
-                     'rope
-                     (mapcar (lambda (rope)
-                               (make-instance 'root :rope rope))
-                             ropes))
-                    output-file
-                    :format :png)
+  (dot-graph (generate-graph-from-roots
+              'rope
+              (mapcar (lambda (rope)
+                        (make-instance 'root
+                                       :name (car rope)
+                                       :rope (cdr rope)))
+                      ropes))
+             output-file
+             :format :png)
   #+slynk (slynk:ed-in-emacs output-file))
 
 #+example
