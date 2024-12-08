@@ -30,7 +30,7 @@
 
 (deftest fuzz-index ()
   (dotimes (i 100)
-    (let* ((length (random 1000))
+    (let* ((length (1+ (random 1000)))
            (string (random-string :length length))
            (rope (rope:make-rope string))
            (index (random length)))

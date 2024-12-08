@@ -9,9 +9,14 @@
 (asdf:defsystem #:rope/test
   :depends-on (#:alexandria #:fiasco #:rope)
   :components ((:module "test"
-                :components ((:file "package")
-                             (:file "basic"))))
-  :perform (asdf:test-op (o c) (uiop:symbol-call :fiasco :all-tests)))
+                :components ((:file "basic")
+                             (:file "fuzz"))))
+  :perform (asdf:test-op
+            (o c)
+            (multiple-value-bind (stat result)
+                (uiop:symbol-call :fiasco :all-tests)
+              (print result)
+              (assert (eql t stat)))))
 
 (asdf:defsystem #:rope/dev
   :depends-on (#:cl-dot #:rope)

@@ -21,19 +21,24 @@
    (right
     :initarg :right
     :initform nil
-    :accessor branch-right)))
+    :accessor branch-right))
+  (:documentation "A node with left and right children."))
 
 (defclass leaf (rope)
   ((string
     :initarg :string
     :initform ""
-    :accessor leaf-string)))
+    :accessor leaf-string))
+  (:documentation "A string segment of a rope."))
 
 ;;-------;;
 ;; Utils ;;
 ;;-------;;
 
 (defgeneric make-rope (source)
+  (:documentation "Create a new rope from a string.")
+  (:method ((source rope))
+    source)
   (:method ((source string))
     (let ((length (length source)))
       (if (<= *long-leaf* length)
@@ -58,6 +63,7 @@
 ;;-----------;;
 
 (defgeneric walk-rope (rope func)
+  (:documentation "Call `func' on each leaf of a rope in order.")
   (:method ((rope leaf) func)
     (funcall func rope)
     (values))
@@ -66,6 +72,7 @@
     (walk-rope (branch-right rope) func)))
 
 (defun write-rope (rope out)
+  "Write a rope to a stream or string, like `format', nil output returns a string."
   (if (null out)
       (with-output-to-string (s) (write-rope rope s))
       (walk-rope rope
@@ -76,6 +83,10 @@
   (let (leaves)
     (walk-rope rope (lambda (leaf) (push leaf leaves)))
     (nreverse leaves)))
+
+;;-----------;;
+;; Balancing ;;
+;;-----------;;
 
 (defun normalize-leaves (leaves &optional carry)
   (let ((leaf (car leaves)))
@@ -91,11 +102,8 @@
           (t
            (cons leaf (normalize-leaves (cdr leaves)))))))
 
-;;-----------;;
-;; Balancing ;;
-;;-----------;;
-
 (defgeneric balancedp (rope)
+  (:documentation "Check if a rope is a height-balanced tree.")
   (:method ((rope leaf))
     t)
   (:method ((rope branch))
@@ -114,6 +122,7 @@
                         (merge-leaves leaves mid end)))))))
 
 (defun balance-rope (rope &optional forcep)
+  "Balance a rope by reconstructing it from the bottom up."
   (if (and (balancedp rope) (not forcep))
       rope
       (let ((leaves (normalize-leaves (collect-rope rope))))
@@ -124,18 +133,21 @@
 ;;--------;;
 
 (defgeneric prepend-rope (rope source)
+  (:documentation "Return a new rope with a string or rope inserted at the beginning of a rope.")
   (:method (rope (source string))
     (concat-rope (make-rope source) rope))
   (:method (rope (source rope))
     (concat-rope source rope)))
 
 (defgeneric append-rope (rope source)
+  (:documentation "Return a new rope with a string or rope inserted at the end of a rope.")
   (:method (rope (source string))
     (concat-rope rope (make-rope source)))
   (:method (rope (source rope))
     (concat-rope rope source)))
 
 (defun insert-rope (rope index str)
+  "Return a new rope with a string or rope inserted at the specified index of a rope."
   (cond ((= index 0) (prepend-rope rope str))
         ((= index (rope-length rope)) (append-rope rope str))
         (t (multiple-value-bind (ante post) (split-rope rope index)
@@ -146,6 +158,7 @@
 ;;-------;;
 
 (defgeneric index-rope (rope index)
+  (:documentation "Get a character at the specified index of a rope.")
   (:method ((rope leaf) index)
     (char (leaf-string rope) index))
   (:method ((rope branch) index)
@@ -158,7 +171,8 @@
 ;; Concat ;;
 ;;--------;;
 
-(defmethod concat-rope (left right)
+(defun concat-rope (left right)
+  "Returns a balanced concatenation of two ropes."
   (balance-rope
    (make-instance 'branch
                   :length (+ (rope-length left) (rope-length right))
@@ -171,6 +185,7 @@
 ;;-------;;
 
 (defgeneric split-rope (rope index)
+  (:documentation "Return balanced ropes split at index as multiple values.")
   (:method ((rope leaf) index)
     (values (make-rope (subseq (leaf-string rope) 0 index))
             (make-rope (subseq (leaf-string rope) index))))
@@ -193,6 +208,7 @@
 ;;------;;
 
 (defun kill-rope (rope from &optional to)
+  "Return a new rope without the characters in the specified range."
   (multiple-value-bind (ante _) (split-rope rope from)
     (declare (ignore _))
     (multiple-value-bind (_ post) (split-rope rope (or to from))
