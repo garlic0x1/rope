@@ -38,16 +38,21 @@
 
 (defmethod graph-object-node ((self (eql 'rope)) (obj leaf))
   (make-instance 'node
-                 :attributes `(:label ,(rope::leaf-string obj)
+                 :attributes `(:label ,(format nil "~a"
+                                               (rope::leaf-string obj))
                                :shape :box)))
 
 (defun graph-ropes (ropes &key (output-file "/tmp/graph.png"))
   (dot-graph (generate-graph-from-roots
               'rope
               (mapcar (lambda (rope)
-                        (make-instance 'root
-                                       :name (car rope)
-                                       :rope (cdr rope)))
+                        (if (consp rope)
+                            (make-instance 'root
+                                           :name (car rope)
+                                           :rope (cdr rope))
+                            (make-instance 'root
+                                           :name :root-node
+                                           :rope rope)))
                       ropes))
              output-file
              :format :png)

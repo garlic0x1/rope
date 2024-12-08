@@ -5,6 +5,10 @@ can use ropes to do it so you can tell everyone on Twitter and
 Hackernews that your editor is blazingly fast and super serious and
 uses fancy text structures.
 
+None of the exported symbols mutate ropes, they return new ones.  This
+lets us reuse as many leaves and branches as possible to reduce memory
+usage, as well as enable a functional style of programming.
+
 # Installation
 
 Once this is polished and well-tested I will post it to Ultralisp, for
