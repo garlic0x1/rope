@@ -180,6 +180,14 @@
           (index-rope (branch-left rope) index)
           (index-rope (branch-right rope) (- index weight))))))
 
+(defun substr-rope (rope from &optional to)
+  "Get a substring out of a rope."
+  (multiple-value-bind (ante _) (split-rope rope (or to (rope-length rope)))
+    (declare (ignore _))
+    (multiple-value-bind (_ post) (split-rope ante from)
+      (declare (ignore _))
+      (write-rope post nil))))
+
 ;;--------;;
 ;; Concat ;;
 ;;--------;;

@@ -22,6 +22,9 @@ With [Ultralisp](https://ultralisp.org/) installed:
 Convert a string to a rope with `make-rope`, and turn it back into a
 string with `write-rope` passing `nil` as the output.
 
+You can also pass an input stream or pathname to `make-rope` to
+efficiently read files.
+
 ```lisp
 (let* ((rope (rope:make-rope "Immutable Ropes for Common Lisp"))
        (super (rope:insert-rope rope 10 "Super "))
@@ -32,7 +35,7 @@ string with `write-rope` passing `nil` as the output.
    (rope:write-rope superer nil)))
 ```
 
-Split a rope at an index
+Split a rope at an index:
 
 ```lisp
 (let ((rope (rope:make-rope "Immutable Super Ropes for Common Lisp")))
@@ -55,6 +58,21 @@ Concatenate ropes together:
 ```
 
 ![Concatenated Rope](screenshots/concat.png)
+
+Kill a segment of a rope:
+
+```lisp
+(let ((rope (rope:make-rope "Immutable Ropes for Common Lisp")))
+  (rope:write-rope (rope:kill-rope rope 20 27) t))
+```
+
+Get chars or strings at a position:
+
+```lisp
+(let ((rope (rope:make-rope "Immutable Ropes for Common Lisp")))
+  (print (rope:index-rope rope 2))
+  (print (rope:substr-rope rope 10 15)))
+```
 
 # Dev Utils
 

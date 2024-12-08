@@ -41,10 +41,13 @@ can be done efficiently.")
     (is (string= "Hello, super rope!" (rope:write-rope super nil)))))
 
 (deftest index-rope ()
-  "Test accessing characters by index"
+  "Test accessing characters and strings by index"
   (let* ((rope (rope:make-rope "0123456789")))
     (is (string= #\1 (rope:index-rope rope 1)))
-    (is (string= #\9 (rope:index-rope rope 9)))))
+    (is (string= #\9 (rope:index-rope rope 9))))
+  (let ((rope (rope:make-rope "Immutable Ropes for Common Lisp")))
+    (is (string= "Ropes" (rope:substr-rope rope 10 15)))))
+
 
 (deftest read-files-and-streams ()
   "Test reading a file to a rope."
