@@ -1,6 +1,7 @@
 (in-package #:rope)
 
 (defparameter *short-leaf* 16)
+(defparameter *target-leaf* 80)
 (defparameter *long-leaf* 128)
 
 (defclass rope ()
@@ -36,9 +37,22 @@
 ;;-------;;
 
 (defgeneric make-rope (source)
-  (:documentation "Create a new rope from a string.")
+  (:documentation "Create a new rope from a string, stream, or pathname.")
   (:method ((source rope))
     source)
+  (:method ((source stream))
+    (labels ((read-leaves (&optional acc)
+               (let* ((string (make-string *long-leaf*))
+                      (length (read-sequence string source))
+                      (leaf (make-instance 'leaf :length length :string (subseq string 0 length))))
+                 (if (= *long-leaf* length)
+                     (read-leaves (cons leaf acc))
+                     (cons leaf acc)))))
+      (let ((leaves (nreverse (read-leaves))))
+        (merge-leaves leaves 0 (length leaves)))))
+  (:method ((source pathname))
+    (with-open-file (s source)
+      (make-rope s)))
   (:method ((source string))
     (let ((length (length source)))
       (if (<= *long-leaf* length)
