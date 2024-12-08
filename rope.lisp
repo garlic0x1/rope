@@ -65,10 +65,24 @@
                  (lambda (leaf)
                    (write-string (leaf-string leaf) out)))))
 
+(defun collect-rope* (rope)
+  (let (leaves)
+    (walk-rope rope (lambda (leaf) (push leaf leaves)))
+    (nreverse leaves)))
+
 (defun collect-rope (rope)
-  (let ((leaves '()) (length 0))
-    (walk-rope rope (lambda (leaf) (push leaf leaves) (incf length)))
-    (values (nreverse leaves) length)))
+  (loop :with carry := ""
+        :for leaf :in (collect-rope* rope)
+        :do (print (leaf-string leaf))
+        :if (>= *short-leaf* (rope-length leaf))
+          :do (setf carry (concatenate 'string carry (leaf-string leaf)))
+        :else
+          :nconc (if (= 0 (length carry))
+                     (list leaf)
+                     (prog1 (collect-rope*
+                             (make-rope
+                              (concatenate 'string carry (leaf-string leaf))))
+                       (setf carry "")))))
 
 ;;-----------;;
 ;; Balancing ;;
@@ -95,11 +109,8 @@
 (defun balance-rope (rope &optional forcep)
   (if (and (balancedp rope) (not forcep))
       rope
-      (multiple-value-bind (leaves length) (collect-rope rope)
-        (merge-leaves
-         (remove-if (lambda (leaf) (= 0 (rope-length leaf)))
-                    leaves)
-         0 length))))
+      (let ((leaves (collect-rope rope)))
+        (merge-leaves leaves 0 (length leaves)))))
 
 ;;--------;;
 ;; Insert ;;
