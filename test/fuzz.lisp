@@ -16,7 +16,8 @@
   (loop :for i :from 1 :to 64
         :do (setf rope::*short-leaf* i)
             (setf rope::*long-leaf* (* 4 i))
-            (is (run-tests :rope/test/basic))))
+            (let ((*standard-output* (make-broadcast-stream)))
+              (is (run-tests :rope/test/basic)))))
 
 (deftest fuzz-split ()
   (dotimes (i 10)
