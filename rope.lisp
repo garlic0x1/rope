@@ -1,7 +1,6 @@
 (in-package #:rope)
 
 (defparameter *short-leaf* 16)
-(defparameter *target-leaf* 80)
 (defparameter *long-leaf* 128)
 
 (defclass rope ()
