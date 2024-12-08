@@ -55,3 +55,21 @@ Concatenate ropes together:
 ```
 
 ![Concatenated Rope](screenshots/concat.png)
+
+# Dev Utils
+
+If you want to generate graphs as shown above, you will need to
+install `:cl-dot` (not in Quicklisp), and load `:rope/dev`.  Then you
+can make a rope and run this:
+
+```lisp
+(defparameter rope::*long-leaf* 24)
+(defparameter rope::*short-leaf* 8)
+
+(let ((rope (rope::make-rope rope/dev::*string*)))
+  (multiple-value-bind (ante post) (rope::split-rope rope 30)
+    (rope/dev:graph-ropes (list rope ante post))))
+```
+
+If you are using Sly in Emacs, it will automatically open up a PNG
+buffer.
