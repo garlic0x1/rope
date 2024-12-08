@@ -41,8 +41,18 @@ Split a rope at an index
     (list ante post)))
 ```
 
-Here is what the split ropes look like graphed with `:cl-dot` I
+Here is what the split ropes look like graphed with `:cl-dot`.  I
 decreased `rope::*long-leaf*` to 8 to better visualize such a small
 string.
 
 ![Split Rope](screenshots/split.png)
+
+Concatenate ropes together:
+
+```lisp
+(let ((rope-a (rope:make-rope "Immutable Super Ropes"))
+      (rope-b (rope:make-rope " for Common Lisp")))
+  (rope:concat-rope rope-a rope-b))
+```
+
+![Concatenated Rope](screenshots/concat.png)
