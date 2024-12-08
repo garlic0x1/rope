@@ -14,7 +14,9 @@
   :perform (asdf:test-op
             (o c)
             (multiple-value-bind (stat result)
-                (uiop:symbol-call :fiasco :all-tests)
+                (uiop:symbol-call :fiasco :run-tests
+                                  '(:rope/test/basic
+                                    :rope/test/fuzz))
               (print result)
               (assert (eql t stat)))))
 
