@@ -45,3 +45,12 @@ can be done efficiently.")
   (let* ((rope (rope:make-rope "0123456789")))
     (is (string= #\1 (rope:index-rope rope 1)))
     (is (string= #\9 (rope:index-rope rope 9)))))
+
+(deftest read-files-and-streams ()
+  "Test reading a file to a rope."
+  (let* ((pathname (merge-pathnames "README.md" (asdf:system-source-directory :rope)))
+         (rope (rope:make-rope pathname)))
+    (is (string= (uiop:read-file-string pathname) (rope:write-rope rope nil))))
+  (let* ((stream (make-string-input-stream *string-2*))
+         (rope (rope:make-rope stream)))
+    (is (string= *string-2* (rope:write-rope rope nil)))))
