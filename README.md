@@ -11,15 +11,10 @@ usage, as well as enable a functional style of programming.
 
 # Installation
 
-Once this is polished and well-tested I will post it to Ultralisp, for
-now you will have to clone and load.
-
-```bash
-git clone https://github.com/garlic0x1/rope.git ~/common-lisp/rope
-```
+With Ultralisp installed:
 
 ```lisp
-(asdf:load-system :rope)
+(ql:quickload :rope)
 ```
 
 # Usage
