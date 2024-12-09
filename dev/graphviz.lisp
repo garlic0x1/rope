@@ -22,21 +22,21 @@
   (let ((obj (root-rope obj)))
     (graph-object-points-to self obj)))
 
-(defmethod graph-object-node ((self (eql 'rope)) (obj branch))
+(defmethod graph-object-node ((self (eql 'rope)) (obj rope::branch))
   (make-instance 'node
                  :attributes `(:label ,(format nil "length: ~a~%depth: ~a"
                                                (rope-length obj)
                                                (rope-depth obj)))))
 
-(defmethod graph-object-points-to ((self (eql 'rope)) (obj branch))
+(defmethod graph-object-points-to ((self (eql 'rope)) (obj rope::branch))
   (list (make-instance 'attributed
-                       :object (branch-right obj)
+                       :object (rope::branch-right obj)
                        :attributes `(:label "R"))
         (make-instance 'attributed
-                       :object (branch-left obj)
+                       :object (rope::branch-left obj)
                        :attributes `(:label "L"))))
 
-(defmethod graph-object-node ((self (eql 'rope)) (obj leaf))
+(defmethod graph-object-node ((self (eql 'rope)) (obj rope::leaf))
   (make-instance 'node
                  :attributes `(:label ,(format nil "~a"
                                                (rope::leaf-string obj))

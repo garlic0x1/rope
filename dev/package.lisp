@@ -1,4 +1,7 @@
 (defpackage #:rope/dev
   (:use #:cl #:cl-dot #:rope)
   (:export
-   #:graph-ropes))
+   ;; graphviz.lisp
+   #:graph-ropes
+   ;; benchmark.lisp
+   ))
