@@ -35,6 +35,18 @@
 ;; Utils ;;
 ;;-------;;
 
+(defun branch-weight (branch)
+  (rope-length (branch-left branch)))
+
+(defun leaf-short-p (leaf)
+  (>= *short-leaf* (rope-length leaf)))
+
+(defun strcat (a b)
+  (concatenate 'string a b))
+
+(defun make-leaf (string &optional length)
+  (make-instance 'leaf :string string :length (or length (length string))))
+
 (defgeneric make-rope (source)
   (:documentation "Create a new rope from a string, stream, or pathname.")
   (:method ((source rope))
@@ -43,7 +55,7 @@
     (labels ((read-leaves (&optional acc)
                (let* ((string (make-string *long-leaf*))
                       (length (read-sequence string source))
-                      (leaf (make-instance 'leaf :length length :string (subseq string 0 length))))
+                      (leaf (make-leaf (subseq string 0 length) length)))
                  (if (= *long-leaf* length)
                      (read-leaves (cons leaf acc))
                      (cons leaf acc)))))
@@ -57,19 +69,7 @@
       (if (<= *long-leaf* length)
           (concat-rope (make-rope (subseq source 0 (round length 2)))
                        (make-rope (subseq source (round length 2))))
-          (make-instance 'leaf :length length :string source)))))
-
-(defgeneric rope-weight (rope)
-  (:method ((rope leaf))
-    (rope-length rope))
-  (:method ((rope branch))
-    (rope-length (branch-left rope))))
-
-(defun leaf-short-p (leaf)
-  (>= *short-leaf* (rope-length leaf)))
-
-(defun strcat (a b)
-  (concatenate 'string a b))
+          (make-leaf source length)))))
 
 ;;-----------;;
 ;; Iteration ;;
@@ -175,7 +175,7 @@
   (:method ((rope leaf) index)
     (char (leaf-string rope) index))
   (:method ((rope branch) index)
-    (let ((weight (rope-weight rope)))
+    (let ((weight (branch-weight rope)))
       (if (< index weight)
           (index-rope (branch-left rope) index)
           (index-rope (branch-right rope) (- index weight))))))
@@ -212,7 +212,7 @@
             (make-rope (subseq (leaf-string rope) index))))
   (:method ((rope branch) index)
     (with-slots (left right) rope
-      (let ((weight (rope-weight rope)))
+      (let ((weight (branch-weight rope)))
         (cond ((= index weight)
                (values left right))
               ((< index weight)

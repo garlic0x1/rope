@@ -20,6 +20,12 @@
               (print result)
               (assert (eql t stat)))))
 
+(asdf:defsystem #:rope/benchmark
+  :depends-on (#:rope)
+  :components ((:module "benchmark"
+                :components ((:file "package")
+                             (:file "insert")))))
+
 (asdf:defsystem #:rope/dev
   :depends-on (#:cl-dot #:rope)
   :components ((:module "dev"
