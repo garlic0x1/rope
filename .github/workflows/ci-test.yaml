@@ -9,6 +9,8 @@ jobs:
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v3
+      - name: Install Git
+        run: apt update && apt install -y git
       - name: Run Tests
         env:
           COVERALLS: 'true'
