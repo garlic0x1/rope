@@ -10,12 +10,15 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v3
       - name: Run Tests
+        env:
+          COVERALLS: 'true'
+          COVERALLS_REPO_TOKEN: 'COVERALLS_REPO_TOKEN=AjlQRo6hsAc6TsTv0tTXXW1AWR0MuFJQP'
         run: |
           set -ex
           sbcl --disable-debugger \
                --load /root/quicklisp/setup.lisp \
                --eval '(ql:update-all-dists)' \
                --load rope.asd \
-               --eval '(ql:quickload :rope/test)' \
-               --eval '(asdf:test-system :rope/test)' \
+               --eval '(ql:quickload :rope/test :silent t)' \
+               --eval '(coveralls:with-coveralls () (asdf:test-system :rope/test))' \
                --eval '(quit)'

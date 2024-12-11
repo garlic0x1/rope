@@ -7,7 +7,7 @@
   :in-order-to ((test-op (test-op #:rope/test))))
 
 (asdf:defsystem #:rope/test
-  :depends-on (#:alexandria #:fiasco #:rope)
+  :depends-on (#:alexandria #:fiasco #:cl-coveralls #:rope)
   :components ((:module "test"
                 :components ((:file "basic")
                              (:file "fuzz"))))
@@ -20,14 +20,9 @@
               (print result)
               (assert (eql t stat)))))
 
-(asdf:defsystem #:rope/benchmark
-  :depends-on (#:rope)
-  :components ((:module "benchmark"
-                :components ((:file "package")
-                             (:file "insert")))))
-
 (asdf:defsystem #:rope/dev
   :depends-on (#:cl-dot #:rope)
   :components ((:module "dev"
                 :components ((:file "package")
-                             (:file "graphviz")))))
+                             (:file "graphviz")
+                             (:file "benchmark")))))

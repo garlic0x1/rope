@@ -4,4 +4,5 @@
    ;; graphviz.lisp
    #:graph-ropes
    ;; benchmark.lisp
+   #:benchmark-insert
    ))
