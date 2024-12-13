@@ -3,7 +3,7 @@
 (defparameter *string* "In computer programming, a rope, or cord, is a data structure composed of smaller strings that is used to efficiently store and manipulate longer strings or entire texts.")
 
 (defparameter rope::*long-leaf* 24)
-(defparameter rope::*short-leaf* 8)
+(defparameter rope::*short-leaf* 2)
 
 (defclass root ()
   ((name :initarg :name :accessor root-name)
@@ -15,7 +15,7 @@
                    :attributes `(:label ,(format nil "rope: ~a~%length: ~a~%depth: ~a"
                                                  (root-name root)
                                                  (rope-length obj)
-                                                 (rope-depth obj))
+                                                 (rope::rope-depth obj))
                                  :style :filled))))
 
 (defmethod graph-object-points-to ((self (eql 'rope)) (obj root))
@@ -26,7 +26,7 @@
   (make-instance 'node
                  :attributes `(:label ,(format nil "length: ~a~%depth: ~a"
                                                (rope-length obj)
-                                               (rope-depth obj)))))
+                                               (rope::rope-depth obj)))))
 
 (defmethod graph-object-points-to ((self (eql 'rope)) (obj rope::branch))
   (list (make-instance 'attributed
@@ -75,3 +75,10 @@
   (setf rope (append-rope rope " we can do it again"))
   (setf rope (append-rope rope " later!"))
   (graph-ropes (list rope)))
+
+#+example
+(let ((rope (rope::make-rope "hello world")))
+  (dotimes (i 10)
+    (setf rope (rope:append-rope rope "!")))
+  (graph-ropes (list (rope::balance-rope rope)
+                     )))

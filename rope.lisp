@@ -101,6 +101,77 @@
 ;; Balancing ;;
 ;;-----------;;
 
+;; Balance: -2
+;; Left Rotation
+;;   a              c
+;;  / \           /    \
+;; b   c         a      e
+;;    / \       / \    / \
+;;   d   e     b   d  f   g
+;;      / \
+;;     f   g
+
+;; Balance: 2
+;; Right Rotation
+;;       a          b
+;;      / \       /    \
+;;     b   c     d      a
+;;    / \       / \    / \
+;;   d   e     f   g  e   c
+;;  / \
+;; f   g
+
+(defgeneric rotate (rope direction)
+  (:method ((rope branch) (direction (eql :left)))
+    (with-slots (left right) rope
+      (concat-rope*
+       (concat-rope* left (branch-left right))
+       (branch-right right))))
+  (:method ((rope branch) (direction (eql :right)))
+    (with-slots (left right) rope
+      (concat-rope*
+       (branch-left left)
+       (concat-rope* (branch-right left) right)))))
+
+(defmethod rotate :around (rope direction)
+  (format t "rope: ~a, rotating: ~a~%" (write-rope rope nil) direction)
+  (call-next-method))
+
+(defgeneric balance-direction (rope)
+  (:method ((rope leaf))
+    nil)
+  (:method ((rope branch))
+    (with-slots (left right) rope
+      (let ((balance (- (rope-depth left) (rope-depth right))))
+        (cond ((< 1 balance)  :right)
+              ((> -1 balance) :left)
+              (t              nil))))))
+
+;; (defmethod balance :around (rope)
+;;   (let ((bal (call-next-method)))
+;;     (format t "rope: ~a, balance: ~a~%" (write-rope rope nil) bal)
+;;     bal))
+
+(defgeneric balance-rope (rope)
+  (:method ((rope leaf))
+    rope)
+  (:method ((rope branch))
+    (with-slots (left right) rope
+      (let* ((left (if (balance-direction left) (balance-rope left) left))
+             (right (if (balance-direction right) (balance-rope right) right))
+             (rope (concat-rope* left right))
+             (balance (balance rope)))
+        (cond ((< 1 balance)
+               (rotate rope :right))
+              ((> -1 balance)
+               (rotate rope :left))
+              (t
+               rope))))))
+
+;;---------;;
+;; Rebuild ;;
+;;---------;;
+
 (defun normalize-leaves (leaves &optional carry)
   (let ((leaf (car leaves)))
     (cond ((and carry (null leaf))
@@ -115,16 +186,6 @@
           (t
            (cons leaf (normalize-leaves (cdr leaves)))))))
 
-(defgeneric balancedp (rope)
-  (:documentation "Check if a rope is a height-balanced tree.")
-  (:method ((rope leaf))
-    t)
-  (:method ((rope branch))
-    (with-slots (left right) rope
-      (and (balancedp left)
-           (balancedp right)
-           (>= 2 (abs (- (rope-depth left) (rope-depth right))))))))
-
 (defun merge-leaves (leaves start end)
   (let ((range (- end start)))
     (case range
@@ -134,12 +195,10 @@
            (concat-rope (merge-leaves leaves start mid)
                         (merge-leaves leaves mid end)))))))
 
-(defun balance-rope (rope &optional forcep)
+(defun rebuild-rope (rope)
   "Balance a rope by reconstructing it from the bottom up."
-  (if (and (balancedp rope) (not forcep))
-      rope
-      (let ((leaves (normalize-leaves (collect-rope rope))))
-        (merge-leaves leaves 0 (length leaves)))))
+  (let ((leaves (normalize-leaves (collect-rope rope))))
+    (merge-leaves leaves 0 (length leaves))))
 
 ;;--------;;
 ;; Insert ;;
@@ -147,17 +206,17 @@
 
 (defgeneric prepend-rope (rope source)
   (:documentation "Return a new rope with a string or rope inserted at the beginning of a rope.")
-  (:method (rope (source string))
-    (concat-rope (make-rope source) rope))
   (:method (rope (source rope))
-    (concat-rope source rope)))
+    (concat-rope source rope))
+  (:method (rope (source t))
+    (concat-rope (make-rope source) rope)))
 
 (defgeneric append-rope (rope source)
   (:documentation "Return a new rope with a string or rope inserted at the end of a rope.")
-  (:method (rope (source string))
-    (concat-rope rope (make-rope source)))
   (:method (rope (source rope))
-    (concat-rope rope source)))
+    (concat-rope rope source))
+  (:method (rope (source t))
+    (concat-rope rope (make-rope source))))
 
 (defun insert-rope (rope index str)
   "Return a new rope with a string or rope inserted at the specified index of a rope."
@@ -192,14 +251,17 @@
 ;; Concat ;;
 ;;--------;;
 
+(defun concat-rope* (left right)
+  "Concatenates without balancing."
+  (make-instance 'branch
+                 :length (+ (rope-length left) (rope-length right))
+                 :depth (1+ (max (rope-depth left) (rope-depth right)))
+                 :left left
+                 :right right))
+
 (defun concat-rope (left right)
   "Returns a balanced concatenation of two ropes."
-  (balance-rope
-   (make-instance 'branch
-                  :length (+ (rope-length left) (rope-length right))
-                  :depth (1+ (max (rope-depth left) (rope-depth right)))
-                  :left left
-                  :right right)))
+  (balance-rope (concat-rope* left right)))
 
 ;;-------;;
 ;; Split ;;
@@ -218,10 +280,10 @@
               ((< index weight)
                (multiple-value-bind (ante post) (split-rope left index)
                  (values (balance-rope ante)
-                         (balance-rope (concat-rope post right)))))
+                         (concat-rope post right))))
               ((> index weight)
                (multiple-value-bind (ante post) (split-rope right (- index weight))
-                 (values (balance-rope (concat-rope left ante))
+                 (values (concat-rope left ante)
                          (balance-rope post)))))))))
 
 ;;------;;

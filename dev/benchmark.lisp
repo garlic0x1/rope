@@ -26,6 +26,9 @@
   (with-open-file (s *readme*)
     (let* ((starting-rope (split-rope (make-rope s) 1000))
            (rope starting-rope))
+      (dotimes (i 9999)
+        (setf rope (concat-rope rope starting-rope)))
+      (setf starting-rope rope)
       (dotimes (i 100)
         (print-time
          (time*
