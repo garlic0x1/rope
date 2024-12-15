@@ -101,26 +101,6 @@
 ;; Balancing ;;
 ;;-----------;;
 
-;; Balance: -2
-;; Left Rotation
-;;   a              c
-;;  / \           /    \
-;; b   c         a      e
-;;    / \       / \    / \
-;;   d   e     b   d  f   g
-;;      / \
-;;     f   g
-
-;; Balance: 2
-;; Right Rotation
-;;       a          b
-;;      / \       /    \
-;;     b   c     d      a
-;;    / \       / \    / \
-;;   d   e     f   g  e   c
-;;  / \
-;; f   g
-
 (defgeneric balance-factor (rope)
   (:method ((rope leaf))
     0)
@@ -160,50 +140,15 @@
     (with-slots (left right) rope
       (let ((bf (balance-factor rope)))
         (cond ((< 0 bf)
-               ;; (balance-children)
                (if (minusp (balance-factor left))
                    (rotate-left-right rope)
                    (rotate-right rope)))
               ((> 0 bf)
-               ;; (balance-children)
                (if (plusp (balance-factor right))
                    (rotate-right-left rope)
                    (rotate-left rope)))
               (t
-               rope))))
-    ;; (with-slots (left right) rope
-    ;;   (let ((left (if (zerop (balance-factor left))
-    ;;                   left
-    ;;                   (balance-rope left)))
-    ;;         (right (if (zerop (balance-factor right))
-    ;;                    right
-    ;;                    (balance-rope right)))
-    ;;         (rope (concat-rope* left right))
-    ;;         (bf (balance-factor rope)))
-    ;;     (format t "root: ~a, left: ~a, right: ~a~%"
-    ;;             bf
-    ;;             (balance-factor left)
-    ;;             (balance-factor right)
-    ;;             )
-    ;;     (cond ((< 0 bf)
-    ;;            (if (minusp (balance-factor left))
-    ;;                (rotate-left-right rope)
-    ;;                (rotate-right rope)))
-    ;;           ((> 0 bf)
-    ;;            (if (plusp (balance-factor right))
-    ;;                (rotate-right-left rope)
-    ;;                (rotate-left rope)))
-    ;;           (t
-    ;;            rope))))
-    ;; (with-slots (left right) rope
-    ;;   (let* ((left (if (balance-direction left) (balance-rope left) left))
-    ;;          (right (if (balance-direction right) (balance-rope right) right))
-    ;;          (rope (concat-rope* left right))
-    ;;          (balance (balance rope)))
-    ;;     (cond ((< 1 balance)  (rotate rope :right))
-    ;;           ((> -1 balance) (rotate rope :left))
-    ;;           (t              rope))))
-    ))
+               rope))))))
 
 ;;---------;;
 ;; Rebuild ;;
