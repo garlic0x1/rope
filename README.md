@@ -74,6 +74,13 @@ Get chars or strings at a position:
   (print (rope:substr-rope rope 10 15)))
 ```
 
+# Performance
+
+Time to insert is a good measure since it splits and concatenates.
+This graph demonstrates O(log(n)) performance:
+
+![Insert Benchmark](screenshots/insert-benchmark.png)
+
 # Dev Utils
 
 If you want to generate graphs as shown above, you will need to
