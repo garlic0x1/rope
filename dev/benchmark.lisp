@@ -21,9 +21,6 @@
       (let ((leaves (nreverse (read-leaves))))
         (rope::merge-leaves leaves 0 (length leaves))))))
 
-(defparameter *readme*
-  (merge-pathnames "README.md" (asdf:system-source-directory :rope)))
-
 (defun print-time (time reps length)
   (format t "rope size: ~a, ~a microseconds~%"
           length
@@ -70,10 +67,4 @@
 
 (defun benchmark-insert (&optional (reps 1000000))
   (setf rope::*long-leaf* 512)
-  (benchmark-log 1000 6 reps)
-  ;; (benchmark-size 10000 10000 10 reps)
-  ;; (benchmark-size 100000 10000 10 reps)
-  ;; (benchmark-size 1000000 100000 10 reps)
-  ;; (benchmark-size 10000000 1000000 10 reps)
-  ;; (benchmark-size 100000000 10000000 100 reps)
-  )
+  (benchmark-log 1000 6 reps))
