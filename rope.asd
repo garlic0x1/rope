@@ -7,7 +7,7 @@
   :in-order-to ((test-op (test-op #:rope/test))))
 
 (asdf:defsystem #:rope/test
-  :depends-on (#:alexandria #:fiasco #:cl-coveralls #:rope)
+  :depends-on (#:alexandria #:fiasco #:rope)
   :components ((:module "test"
                 :components ((:file "basic")
                              (:file "fuzz"))))
