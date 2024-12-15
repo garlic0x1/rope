@@ -81,6 +81,9 @@ This graph demonstrates O(log(n)) performance:
 
 ![Insert Benchmark](screenshots/insert-benchmark.png)
 
+Inserting into a gigabyte rope takes approximately 26 microseconds on
+my i5-6200U.
+
 # Dev Utils
 
 If you want to generate graphs as shown above, you will need to
