@@ -24,4 +24,5 @@
   :depends-on (#:cl-dot #:rope)
   :components ((:module "dev"
                 :components ((:file "package")
-                             (:file "graphviz")))))
+                             (:file "graphviz")
+                             (:file "benchmark")))))

@@ -3,7 +3,7 @@
 (defparameter *string* "In computer programming, a rope, or cord, is a data structure composed of smaller strings that is used to efficiently store and manipulate longer strings or entire texts.")
 
 (defparameter rope::*long-leaf* 24)
-(defparameter rope::*short-leaf* 8)
+(defparameter rope::*short-leaf* 2)
 
 (defclass root ()
   ((name :initarg :name :accessor root-name)
@@ -15,28 +15,28 @@
                    :attributes `(:label ,(format nil "rope: ~a~%length: ~a~%depth: ~a"
                                                  (root-name root)
                                                  (rope-length obj)
-                                                 (rope-depth obj))
+                                                 (rope::rope-depth obj))
                                  :style :filled))))
 
 (defmethod graph-object-points-to ((self (eql 'rope)) (obj root))
   (let ((obj (root-rope obj)))
     (graph-object-points-to self obj)))
 
-(defmethod graph-object-node ((self (eql 'rope)) (obj branch))
+(defmethod graph-object-node ((self (eql 'rope)) (obj rope::branch))
   (make-instance 'node
                  :attributes `(:label ,(format nil "length: ~a~%depth: ~a"
                                                (rope-length obj)
-                                               (rope-depth obj)))))
+                                               (rope::rope-depth obj)))))
 
-(defmethod graph-object-points-to ((self (eql 'rope)) (obj branch))
+(defmethod graph-object-points-to ((self (eql 'rope)) (obj rope::branch))
   (list (make-instance 'attributed
-                       :object (branch-right obj)
+                       :object (rope::branch-right obj)
                        :attributes `(:label "R"))
         (make-instance 'attributed
-                       :object (branch-left obj)
+                       :object (rope::branch-left obj)
                        :attributes `(:label "L"))))
 
-(defmethod graph-object-node ((self (eql 'rope)) (obj leaf))
+(defmethod graph-object-node ((self (eql 'rope)) (obj rope::leaf))
   (make-instance 'node
                  :attributes `(:label ,(format nil "~a"
                                                (rope::leaf-string obj))
@@ -75,3 +75,12 @@
   (setf rope (append-rope rope " we can do it again"))
   (setf rope (append-rope rope " later!"))
   (graph-ropes (list rope)))
+
+#+example
+(let ((rope (rope::make-rope "hello world")))
+  (dotimes (i 15)
+    (setf rope (rope:append-rope rope "!")))
+  (dotimes (i 5)
+    (setf rope (rope:insert-rope rope 8 "@")))
+  (graph-ropes (list rope
+                     )))
