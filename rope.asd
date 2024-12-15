@@ -21,7 +21,7 @@
               (assert (eql t stat)))))
 
 (asdf:defsystem #:rope/dev
-  :depends-on (#:cl-dot #:rope)
+  :depends-on (#:alexandria #:cl-dot #:rope)
   :components ((:module "dev"
                 :components ((:file "package")
                              (:file "graphviz")
