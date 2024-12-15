@@ -18,4 +18,4 @@ jobs:
                --load rope.asd \
                --eval '(ql:quickload :rope/test)' \
                --eval '(asdf:test-system :rope/test)' \
-               --eval '(quit)'name: ci-test
+               --eval '(quit)'
