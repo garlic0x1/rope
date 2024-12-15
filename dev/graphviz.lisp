@@ -80,7 +80,7 @@
 (let ((rope (rope::make-rope "hello world")))
   (dotimes (i 15)
     (setf rope (rope:append-rope rope "!")))
-  ;; (dotimes (i 15)
-  ;;   (setf rope (rope::balance-rope rope)))
+  (dotimes (i 5)
+    (setf rope (rope:insert-rope rope 8 "@")))
   (graph-ropes (list rope
                      )))
