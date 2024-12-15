@@ -78,7 +78,9 @@
 
 #+example
 (let ((rope (rope::make-rope "hello world")))
-  (dotimes (i 10)
+  (dotimes (i 15)
     (setf rope (rope:append-rope rope "!")))
-  (graph-ropes (list (rope::balance-rope rope)
+  ;; (dotimes (i 15)
+  ;;   (setf rope (rope::balance-rope rope)))
+  (graph-ropes (list rope
                      )))

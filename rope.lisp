@@ -121,52 +121,89 @@
 ;;  / \
 ;; f   g
 
-(defgeneric rotate (rope direction)
-  (:method ((rope branch) (direction (eql :left)))
-    (with-slots (left right) rope
-      (concat-rope*
-       (concat-rope* left (branch-left right))
-       (branch-right right))))
-  (:method ((rope branch) (direction (eql :right)))
-    (with-slots (left right) rope
-      (concat-rope*
-       (branch-left left)
-       (concat-rope* (branch-right left) right)))))
-
-(defmethod rotate :around (rope direction)
-  (format t "rope: ~a, rotating: ~a~%" (write-rope rope nil) direction)
-  (call-next-method))
-
-(defgeneric balance-direction (rope)
+(defgeneric balance-factor (rope)
   (:method ((rope leaf))
-    nil)
+    0)
   (:method ((rope branch))
-    (with-slots (left right) rope
-      (let ((balance (- (rope-depth left) (rope-depth right))))
-        (cond ((< 1 balance)  :right)
-              ((> -1 balance) :left)
-              (t              nil))))))
+    (- (rope-depth (branch-left rope))
+       (rope-depth (branch-right rope)))))
 
-;; (defmethod balance :around (rope)
-;;   (let ((bal (call-next-method)))
-;;     (format t "rope: ~a, balance: ~a~%" (write-rope rope nil) bal)
-;;     bal))
+(defun rotate-left (rope)
+  (with-slots (left right) rope
+    (concat-rope*
+     (concat-rope left (branch-left right))
+     (branch-right right))))
+
+(defun rotate-right (rope)
+  (with-slots (left right) rope
+    (concat-rope*
+     (branch-left left)
+     (concat-rope (branch-right left) right))))
+
+(defun rotate-left-right (rope)
+  (with-slots (left right) rope
+    (rotate-right (concat-rope* (rotate-left left) right))))
+
+(defun rotate-right-left (rope)
+  (with-slots (left right) rope
+    (rotate-left (concat-rope* left (rotate-right right)))))
+
+(defun balance-children (rope)
+  (with-slots (left right) rope
+    (concat-rope* (balance-rope left)
+                  (balance-rope right))))
 
 (defgeneric balance-rope (rope)
   (:method ((rope leaf))
     rope)
   (:method ((rope branch))
     (with-slots (left right) rope
-      (let* ((left (if (balance-direction left) (balance-rope left) left))
-             (right (if (balance-direction right) (balance-rope right) right))
-             (rope (concat-rope* left right))
-             (balance (balance rope)))
-        (cond ((< 1 balance)
-               (rotate rope :right))
-              ((> -1 balance)
-               (rotate rope :left))
+      (let ((bf (balance-factor rope)))
+        (cond ((< 0 bf)
+               ;; (balance-children)
+               (if (minusp (balance-factor left))
+                   (rotate-left-right rope)
+                   (rotate-right rope)))
+              ((> 0 bf)
+               ;; (balance-children)
+               (if (plusp (balance-factor right))
+                   (rotate-right-left rope)
+                   (rotate-left rope)))
               (t
-               rope))))))
+               rope))))
+    ;; (with-slots (left right) rope
+    ;;   (let ((left (if (zerop (balance-factor left))
+    ;;                   left
+    ;;                   (balance-rope left)))
+    ;;         (right (if (zerop (balance-factor right))
+    ;;                    right
+    ;;                    (balance-rope right)))
+    ;;         (rope (concat-rope* left right))
+    ;;         (bf (balance-factor rope)))
+    ;;     (format t "root: ~a, left: ~a, right: ~a~%"
+    ;;             bf
+    ;;             (balance-factor left)
+    ;;             (balance-factor right)
+    ;;             )
+    ;;     (cond ((< 0 bf)
+    ;;            (if (minusp (balance-factor left))
+    ;;                (rotate-left-right rope)
+    ;;                (rotate-right rope)))
+    ;;           ((> 0 bf)
+    ;;            (if (plusp (balance-factor right))
+    ;;                (rotate-right-left rope)
+    ;;                (rotate-left rope)))
+    ;;           (t
+    ;;            rope))))
+    ;; (with-slots (left right) rope
+    ;;   (let* ((left (if (balance-direction left) (balance-rope left) left))
+    ;;          (right (if (balance-direction right) (balance-rope right) right))
+    ;;          (rope (concat-rope* left right))
+    ;;          (balance (balance rope)))
+    ;;     (cond ((< 1 balance)  (rotate rope :right))
+    ;;           ((> -1 balance) (rotate rope :left))
+    ;;           (t              rope))))
+    ))
 
 ;;---------;;
 ;; Rebuild ;;
