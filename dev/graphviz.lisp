@@ -24,9 +24,13 @@
 
 (defmethod graph-object-node ((self (eql 'rope)) (obj rope::branch))
   (make-instance 'node
-                 :attributes `(:label ,(format nil "length: ~a~%depth: ~a"
+                 :attributes `(:label ,(format nil "length: ~a~%bf: ~a~%depth: ~a"
                                                (rope-length obj)
-                                               (rope::rope-depth obj)))))
+                                               (rope::balance-factor obj)
+                                               (rope::rope-depth obj))
+                               :style ,(if (>= 1 (abs (rope::balance-factor obj)))
+                                           :solid
+                                           :filled))))
 
 (defmethod graph-object-points-to ((self (eql 'rope)) (obj rope::branch))
   (list (make-instance 'attributed

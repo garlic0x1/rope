@@ -1,4 +1,5 @@
-(fiasco:define-test-package :rope/test/basic)
+(fiasco:define-test-package :rope/test/basic
+  (:use #:rope/test/util))
 (in-package :rope/test/basic)
 
 (defparameter *string-1*
@@ -19,7 +20,9 @@ can be done efficiently.")
     (is (= (length *string-1*) (rope:rope-length rope-1)))
     (is (= (length *string-2*) (rope:rope-length rope-2)))
     (is (string= *string-1* (rope:write-rope rope-1 nil)))
-    (is (string= *string-2* (rope:write-rope rope-2 nil)))))
+    (is (string= *string-2* (rope:write-rope rope-2 nil)))
+    (is (balancedp rope-1))
+    (is (balancedp rope-2))))
 
 (deftest split ()
   "Test splitting ropes and check to ensure it is the same as splitting strings."
@@ -27,7 +30,9 @@ can be done efficiently.")
     (let ((rope (rope:make-rope *string-2*)))
       (multiple-value-bind (ante post) (rope:split-rope rope i)
         (is (string= (subseq *string-2* 0 i) (rope:write-rope ante nil)))
-        (is (string= (subseq *string-2* i) (rope:write-rope post nil)))))))
+        (is (string= (subseq *string-2* i) (rope:write-rope post nil)))
+        (is (balancedp ante))
+        (is (balancedp post))))))
 
 (deftest delete-and-insert ()
   "Make a rope, then a rope with a part deleted, then inserted."
@@ -38,7 +43,10 @@ can be done efficiently.")
     (is (string= "Hello, rope!" (rope:write-rope rope nil)))
     (is (string= ", rope!" (rope:write-rope killed nil)))
     (is (string= "Goodbye, rope!" (rope:write-rope inserted nil)))
-    (is (string= "Hello, super rope!" (rope:write-rope super nil)))))
+    (is (string= "Hello, super rope!" (rope:write-rope super nil)))
+    (is (balancedp killed))
+    (is (balancedp inserted))
+    (is (balancedp super))))
 
 (deftest index-rope ()
   "Test accessing characters and strings by index"
@@ -53,7 +61,9 @@ can be done efficiently.")
   "Test reading a file to a rope."
   (let* ((pathname (merge-pathnames "README.md" (asdf:system-source-directory :rope)))
          (rope (rope:make-rope pathname)))
-    (is (string= (uiop:read-file-string pathname) (rope:write-rope rope nil))))
+    (is (string= (uiop:read-file-string pathname) (rope:write-rope rope nil)))
+    (is (balancedp rope)))
   (let* ((stream (make-string-input-stream *string-2*))
          (rope (rope:make-rope stream)))
-    (is (string= *string-2* (rope:write-rope rope nil)))))
+    (is (string= *string-2* (rope:write-rope rope nil)))
+    (is (balancedp rope))))

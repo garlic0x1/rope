@@ -9,7 +9,8 @@
 (asdf:defsystem #:rope/test
   :depends-on (#:alexandria #:fiasco #:rope)
   :components ((:module "test"
-                :components ((:file "basic")
+                :components ((:file "util")
+                             (:file "basic")
                              (:file "fuzz"))))
   :perform (asdf:test-op
             (o c)

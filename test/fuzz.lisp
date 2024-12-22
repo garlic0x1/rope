@@ -1,38 +1,6 @@
 (fiasco:define-test-package :rope/test/fuzz
-  (:local-nicknames (#:a #:alexandria)))
+  (:use #:rope/test/util))
 (in-package :rope/test/fuzz)
-
-(defvar *charset* "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789")
-
-(defun random-string (&key (length 128) (acc ""))
-  (if (= 0 length)
-      acc
-      (random-string
-       :length (1- length)
-       :acc (rope::strcat acc (string (a:random-elt *charset*))))))
-
-(defun random-rope (total-length)
-  (with-open-file (source "/dev/urandom" :element-type '(unsigned-byte 8))
-    (labels ((read-leaves (&optional acc (acc-length 0))
-               (let* ((string* (make-array (min rope::*long-leaf* (- total-length acc-length))
-                                           :element-type '(unsigned-byte 8)))
-                      (length (read-sequence string* source))
-                      (string (map 'string #'code-char string*))
-                      (leaf (rope::make-leaf (subseq string 0 length) length)))
-                 (if (and (= rope::*long-leaf* length)
-                          (not (= total-length (+ length acc-length))))
-                     (read-leaves (cons leaf acc) (+ length acc-length))
-                     (cons leaf acc)))))
-      (let ((leaves (nreverse (read-leaves))))
-        (rope::merge-leaves leaves 0 (length leaves))))))
-
-(defgeneric balancedp (rope)
-  (:method ((rope rope::leaf))
-    t)
-  (:method ((rope rope::branch))
-    (and (>= 1 (abs (rope::balance-factor rope)))
-         (balancedp (rope::branch-left rope))
-         (balancedp (rope::branch-right rope)))))
 
 (deftest fuzz-basic-tests ()
   "Run the basic test suite with different leaf sizes."
@@ -85,16 +53,25 @@
       (is (balancedp new-rope))
       (is (string= new-string (rope:write-rope new-rope nil))))))
 
-#+ignore
 (deftest fuzz-insert-balance ()
   (setf rope::*long-leaf* 128)
   (dotimes (i 10)
-    (let ((rope (random-rope 1000)))
-      (dotimes (i 100)
+    (let ((rope (random-rope 10)))
+      (dotimes (i 1000)
         (setf rope
               (rope:insert-rope rope
                                 (random (rope:rope-length rope))
-                                (random-string :length (random 512))))
-        (unless (balancedp rope)
-          (return-from fuzz-insert-balance rope))
+                                (random-string :length (random 5))))
         (is (balancedp rope))))))
+
+;; (deftest fuzz-random-actions-balance
+;;     (&key (rope (random-rope (random 256)))
+;;           (iterations 1000))
+;;   (cond ((> 50000 (rope:rope-length rope))
+;;          (fuzz-random-actions-balance
+;;           :rope (random-insert rope)
+;;           :iterations (1- iterations)))
+;;         ((< 12 (rope:rope-length rope))
+;;          (fuzz-random-actions-balance
+;;           :rope (random-kill rope)
+;;           :iterations (1- iterations)))))

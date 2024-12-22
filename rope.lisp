@@ -38,8 +38,11 @@
 (defun branch-weight (branch)
   (rope-length (branch-left branch)))
 
-(defun leaf-short-p (leaf)
-  (>= *short-leaf* (rope-length leaf)))
+(defun leaf-short-p (leaf &optional other)
+  (>= *short-leaf*
+      (if other
+          (+ (rope-length leaf) (rope-length other))
+          (rope-length leaf))))
 
 (defun strcat (a b)
   (concatenate 'string a b))
@@ -128,10 +131,10 @@
   (with-slots (left right) rope
     (rotate-left (concat-rope* left (rotate-right right)))))
 
-(defun balance-children (rope)
-  (with-slots (left right) rope
-    (concat-rope* (balance-rope left)
-                  (balance-rope right))))
+;; (defun balance-children (rope)
+;;   (with-slots (left right) rope
+;;     (concat-rope* (balance-rope left)
+;;                   (balance-rope right))))
 
 (defgeneric balance-rope (rope)
   (:method ((rope leaf))
@@ -139,14 +142,16 @@
   (:method ((rope branch))
     (with-slots (left right) rope
       (let ((bf (balance-factor rope)))
-        (cond ((< 0 bf)
-               (if (minusp (balance-factor left))
-                   (rotate-left-right rope)
-                   (rotate-right rope)))
-              ((> 0 bf)
-               (if (plusp (balance-factor right))
-                   (rotate-right-left rope)
-                   (rotate-left rope)))
+        (cond ((< 1 bf)
+               (balance-rope
+                (if (minusp (balance-factor left))
+                    (rotate-left-right rope)
+                    (rotate-right rope))))
+              ((> -1 bf)
+               (balance-rope
+                (if (plusp (balance-factor right))
+                    (rotate-right-left rope)
+                    (rotate-left rope))))
               (t
                rope))))))
 
@@ -188,17 +193,45 @@
 
 (defgeneric prepend-rope (rope source)
   (:documentation "Return a new rope with a string or rope inserted at the beginning of a rope.")
-  (:method (rope (source rope))
-    (concat-rope source rope))
   (:method (rope (source t))
-    (concat-rope (make-rope source) rope)))
+    (prepend-rope rope (make-rope source)))
+  (:method (rope (source branch))
+    (concat-rope source rope))
+  (:method ((rope leaf) (source leaf))
+    (if (leaf-short-p rope source)
+        (make-leaf (strcat (leaf-string source) (leaf-string rope)))
+        (concat-rope* source rope)))
+  (:method ((rope branch) (source leaf))
+    (with-slots (left right) rope
+      (concat-rope* (prepend-rope left source) right))))
 
 (defgeneric append-rope (rope source)
   (:documentation "Return a new rope with a string or rope inserted at the end of a rope.")
-  (:method (rope (source rope))
-    (concat-rope rope source))
   (:method (rope (source t))
-    (concat-rope rope (make-rope source))))
+    (append-rope rope (make-rope source)))
+  (:method (rope (source branch))
+    (concat-rope rope source))
+  (:method ((rope leaf) (source leaf))
+    (if (leaf-short-p rope source)
+        (make-leaf (strcat (leaf-string rope) (leaf-string source)))
+        (concat-rope* rope source)))
+  (:method ((rope branch) (source leaf))
+    (with-slots (left right) rope
+      (concat-rope* left (append-rope right source)))))
+
+;; (defgeneric prepend-rope (rope source)
+;;   (:documentation "Return a new rope with a string or rope inserted at the beginning of a rope.")
+;;   (:method (rope (source rope))
+;;     (concat-rope source rope))
+;;   (:method (rope (source t))
+;;     (concat-rope (make-rope source) rope)))
+
+;; (defgeneric append-rope (rope source)
+;;   (:documentation "Return a new rope with a string or rope inserted at the end of a rope.")
+;;   (:method (rope (source rope))
+;;     (concat-rope rope source))
+;;   (:method (rope (source t))
+;;     (concat-rope rope (make-rope source))))
 
 (defun insert-rope (rope index str)
   "Return a new rope with a string or rope inserted at the specified index of a rope."
