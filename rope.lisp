@@ -131,11 +131,6 @@
   (with-slots (left right) rope
     (rotate-left (concat-rope* left (rotate-right right)))))
 
-;; (defun balance-children (rope)
-;;   (with-slots (left right) rope
-;;     (concat-rope* (balance-rope left)
-;;                   (balance-rope right))))
-
 (defgeneric balance-rope (rope)
   (:method ((rope leaf))
     rope)
@@ -183,7 +178,9 @@
                         (merge-leaves leaves mid end)))))))
 
 (defun rebuild-rope (rope)
-  "Balance a rope by reconstructing it from the bottom up."
+  "Reconstruct a rope from the bottom up.
+Doing this occasionally can reduce the number of leaves in a rope,
+but it is expensive - O(n)."
   (let ((leaves (normalize-leaves (collect-rope rope))))
     (merge-leaves leaves 0 (length leaves))))
 
@@ -218,20 +215,6 @@
   (:method ((rope branch) (source leaf))
     (with-slots (left right) rope
       (concat-rope* left (append-rope right source)))))
-
-;; (defgeneric prepend-rope (rope source)
-;;   (:documentation "Return a new rope with a string or rope inserted at the beginning of a rope.")
-;;   (:method (rope (source rope))
-;;     (concat-rope source rope))
-;;   (:method (rope (source t))
-;;     (concat-rope (make-rope source) rope)))
-
-;; (defgeneric append-rope (rope source)
-;;   (:documentation "Return a new rope with a string or rope inserted at the end of a rope.")
-;;   (:method (rope (source rope))
-;;     (concat-rope rope source))
-;;   (:method (rope (source t))
-;;     (concat-rope rope (make-rope source))))
 
 (defun insert-rope (rope index str)
   "Return a new rope with a string or rope inserted at the specified index of a rope."
